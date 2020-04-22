@@ -34,7 +34,29 @@ public class Piece {
 	 Makes its own copy of the array and the TPoints inside it.
 	*/
 	public Piece(TPoint[] points) {
-		// YOUR CODE HERE
+		this.body = new TPoint[points.length];
+		int lf=-1, rg = -1,up = -1,dw = -1;
+		for(int i=0; i<points.length;i++){
+			body[i] = new TPoint(points[i]);
+			if(rg==-1||body[i].x>rg)rg=body[i].x;
+			if(up==-1||body[i].y>up)up=body[i].y;
+			if(lf==-1||body[i].x<lf)lf=body[i].x;
+			if(dw==-1||body[i].y<dw)dw=body[i].y;
+		}
+
+		this.width=rg-lf+1;
+		this.height=up-dw+1;
+		this.skirt = new int[this.width];
+		for(int i=0; i<width; i++){
+			skirt[i] = -1;
+		}
+		for(int i=0; i<points.length; i++){
+			if(skirt[points[i].x-lf]==-1||points[i].y<skirt[points[i].x-lf]){
+				skirt[points[i].x-lf] = points[i].y;
+			}
+		}
+
+		this.next = null;
 	}
 	
 
@@ -87,8 +109,11 @@ public class Piece {
 	 rotated from the receiver.
 	 */
 	public Piece computeNextRotation() {
-		// YOUR CODE HERE
-		return null; // YOUR CODE HERE
+		TPoint[] rotate = new TPoint[this.body.length];
+		for(int i=0; i<body.length; i++){
+			rotate[i] = new TPoint(this.height-1-body[i].y,body[i].x);
+		}
+		return  (new Piece(rotate));
 	}
 
 	/**
@@ -119,8 +144,24 @@ public class Piece {
 		// (null will be false)
 		if (!(obj instanceof Piece)) return false;
 		Piece other = (Piece)obj;
-		
-		// YOUR CODE HERE
+		if(this.width!=other.width)return false;
+		if(this.height!=other.height)return false;
+		if(this.body.length!=other.body.length)return false;
+		Set<TPoint> p = new HashSet<TPoint>();
+
+		for(int i=0; i<this.body.length; i++) {
+			p.add(this.body[i]);
+		}
+
+		for(TPoint po:p){
+			int k;
+			for(k=0; k<other.body.length; k++){
+				if(po.x==other.body[k].x&&po.y==other.body[k].y){
+					break;
+				}
+			}
+			if(k==other.body.length)return false;
+		}
 		return true;
 	}
 
@@ -187,8 +228,17 @@ public class Piece {
 	 to the first piece.
 	*/
 	private static Piece makeFastRotations(Piece root) {
-		// YOUR CODE HERE
-		return null; // YOUR CODE HERE
+		Piece nexter;
+		Piece last = root;
+		while(true){
+			nexter =  last.computeNextRotation();
+			if(nexter.equals(root)){
+				last.next = root;
+				return  root;
+			}
+			last.next = nexter;
+			last=nexter;
+		}
 	}
 	
 	
